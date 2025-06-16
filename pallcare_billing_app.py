@@ -6,11 +6,11 @@ BASE_CONSULT_MIN_TIME = 50
 BASE_CONSULT_CODE = "A945/C945"
 K023_CODE = "K023"
 
-# --- NEW: Fee Constants ---
+# --- Fee Constants ---
 BASE_CONSULT_FEE = 159.20
 K023_FEE_PER_UNIT = 74.70
 
-# --- Calculation Functions (Same as before) ---
+# --- Calculation Functions ---
 def calculate_k023_units(time_in_minutes):
     billable_units = 0
     for i, threshold in enumerate(K023_TIME_THRESHOLDS):
@@ -19,8 +19,10 @@ def calculate_k023_units(time_in_minutes):
     return billable_units
 
 # --- Streamlit User Interface ---
-st.set_page_config(page_title="OHIP Billing Calculator", layout="centered")
-st.title("OHIP Palliative Care Calculator")
+st.set_page_config(page_title="Palliative Care Billing Calculator (OHIP)", layout="centered")
+# --- THIS IS THE LINE THAT HAS BEEN CHANGED ---
+st.title("Palliative Care Billing Calculator (OHIP)")
+# --- ---
 st.write("A tool to calculate billing codes for consultations and follow-ups.")
 
 # UI remains the same
@@ -54,9 +56,8 @@ if st.button("Calculate Billing Codes"):
                 if num_k023_units > 0:
                     st.subheader(f"• {K023_CODE} x {num_k023_units} unit(s)")
                 
-                # --- NEW: Calculate and display total payment ---
                 total_payment = BASE_CONSULT_FEE + (num_k023_units * K023_FEE_PER_UNIT)
-                st.divider() # Adds a visual separator
+                st.divider()
                 st.metric(label="Total Payment", value=f"${total_payment:.2f}")
                 
                 with st.expander("See Time Breakdown"):
@@ -75,9 +76,8 @@ if st.button("Calculate Billing Codes"):
                 st.success(f"For a {duration_in_minutes} minute FOLLOW-UP, you should bill:")
                 st.subheader(f"• {K023_CODE} x {num_k023_units} unit(s)")
                 
-                # --- NEW: Calculate and display total payment ---
                 total_payment = num_k023_units * K023_FEE_PER_UNIT
-                st.divider() # Adds a visual separator
+                st.divider()
                 st.metric(label="Total Payment", value=f"${total_payment:.2f}")
     else:
         st.warning("Please enter a duration greater than 0.")
