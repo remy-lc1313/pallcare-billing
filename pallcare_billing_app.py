@@ -20,9 +20,7 @@ def calculate_k023_units(time_in_minutes):
 
 # --- Streamlit User Interface ---
 st.set_page_config(page_title="Palliative Care Billing Calculator (OHIP)", layout="centered")
-# --- THIS IS THE LINE THAT HAS BEEN CHANGED ---
 st.title("Palliative Care Billing Calculator (OHIP)")
-# --- ---
 st.write("A tool to calculate billing codes for consultations and follow-ups.")
 
 # UI remains the same
@@ -42,7 +40,7 @@ duration_in_minutes = st.number_input(
 # A button to trigger the calculation
 if st.button("Calculate Billing Codes"):
     if duration_in_minutes > 0:
-        # --- Consultation Logic with Payment Calculation ---
+        # --- Consultation Logic with Payment Breakdown ---
         if encounter_type == 'Special Palliative Care Consultation':
             if duration_in_minutes < BASE_CONSULT_MIN_TIME:
                 st.error(f"Duration ({duration_in_minutes} min) is less than the required {BASE_CONSULT_MIN_TIME} minutes. "
@@ -60,17 +58,24 @@ if st.button("Calculate Billing Codes"):
                 st.divider()
                 st.metric(label="Total Payment", value=f"${total_payment:.2f}")
                 
+                # --- NEW: Payment Breakdown Expander ---
+                with st.expander("Show Payment Breakdown"):
+                    st.write(f"`{BASE_CONSULT_CODE}` Fee: `${BASE_CONSULT_FEE:.2f}`")
+                    if num_k023_units > 0:
+                        k023_total_fee = num_k023_units * K023_FEE_PER_UNIT
+                        st.write(f"`{K023_CODE}` Fee ({num_k023_units} units x ${K023_FEE_PER_UNIT:.2f}): `${k023_total_fee:.2f}`")
+                
                 with st.expander("See Time Breakdown"):
-                    st.write(f"**First {BASE_CONSULT_MIN_TIME} min:** Covered by {BASE_CONSULT_CODE}.")
-                    st.write(f"**Remaining {time_for_k023} min:** Used for {K023_CODE} calculation.")
+                    st.write(f"**First {BASE_CONSULT_MIN_TIME} min:** Covered by `{BASE_CONSULT_CODE}`.")
+                    st.write(f"**Remaining {time_for_k023} min:** Used for `{K023_CODE}` calculation.")
 
-        # --- Follow-up Logic with Payment Calculation ---
+        # --- Follow-up Logic with Payment Breakdown ---
         elif encounter_type == 'Palliative Care Follow-up':
             num_k023_units = calculate_k023_units(duration_in_minutes)
             
             if num_k023_units == 0:
                 min_time_for_one_unit = K023_TIME_THRESHOLDS[0]
-                st.warning(f"Duration ({duration_in_minutes} min) is too short to bill any units of {K023_CODE}. "
+                st.warning(f"Duration ({duration_in_minutes} min) is too short to bill any units of `{K023_CODE}`. "
                            f"A minimum of {min_time_for_one_unit} minutes is required.")
             else:
                 st.success(f"For a {duration_in_minutes} minute FOLLOW-UP, you should bill:")
@@ -79,5 +84,11 @@ if st.button("Calculate Billing Codes"):
                 total_payment = num_k023_units * K023_FEE_PER_UNIT
                 st.divider()
                 st.metric(label="Total Payment", value=f"${total_payment:.2f}")
+
+                # --- NEW: Payment Breakdown Expander ---
+                with st.expander("Show Payment Breakdown"):
+                    k023_total_fee = num_k023_units * K023_FEE_PER_UNIT
+                    st.write(f"`{K023_CODE}` Fee ({num_k023_units} units x ${K023_FEE_PER_UNIT:.2f}): `${k023_total_fee:.2f}`")
+
     else:
         st.warning("Please enter a duration greater than 0.")
