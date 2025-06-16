@@ -40,7 +40,7 @@ duration_in_minutes = st.number_input(
 # A button to trigger the calculation
 if st.button("Calculate Billing Codes"):
     if duration_in_minutes > 0:
-        # --- Consultation Logic with Payment Breakdown ---
+        # --- Consultation Logic ---
         if encounter_type == 'Special Palliative Care Consultation':
             if duration_in_minutes < BASE_CONSULT_MIN_TIME:
                 st.error(f"Duration ({duration_in_minutes} min) is less than the required {BASE_CONSULT_MIN_TIME} minutes. "
@@ -58,7 +58,6 @@ if st.button("Calculate Billing Codes"):
                 st.divider()
                 st.metric(label="Total Payment", value=f"${total_payment:.2f}")
                 
-                # --- NEW: Payment Breakdown Expander ---
                 with st.expander("Show Payment Breakdown"):
                     st.write(f"`{BASE_CONSULT_CODE}` Fee: `${BASE_CONSULT_FEE:.2f}`")
                     if num_k023_units > 0:
@@ -69,7 +68,7 @@ if st.button("Calculate Billing Codes"):
                     st.write(f"**First {BASE_CONSULT_MIN_TIME} min:** Covered by `{BASE_CONSULT_CODE}`.")
                     st.write(f"**Remaining {time_for_k023} min:** Used for `{K023_CODE}` calculation.")
 
-        # --- Follow-up Logic with Payment Breakdown ---
+        # --- Follow-up Logic ---
         elif encounter_type == 'Palliative Care Follow-up':
             num_k023_units = calculate_k023_units(duration_in_minutes)
             
@@ -85,10 +84,15 @@ if st.button("Calculate Billing Codes"):
                 st.divider()
                 st.metric(label="Total Payment", value=f"${total_payment:.2f}")
 
-                # --- NEW: Payment Breakdown Expander ---
                 with st.expander("Show Payment Breakdown"):
                     k023_total_fee = num_k023_units * K023_FEE_PER_UNIT
                     st.write(f"`{K023_CODE}` Fee ({num_k023_units} units x ${K023_FEE_PER_UNIT:.2f}): `${k023_total_fee:.2f}`")
 
     else:
         st.warning("Please enter a duration greater than 0.")
+
+# --- NEW: Attribution Footer ---
+# This part is placed at the end so it appears at the bottom of the app.
+st.divider()
+st.caption("A tool created by LC")
+# --- ---
